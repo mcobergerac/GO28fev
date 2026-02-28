@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur Exercices Gestion MCO - Avancé</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #f0f2f5; color: #333; }
+        h1, h2 { color: #2c3e50; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .menu, .exercise-area { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .menu { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        button { padding: 12px 20px; cursor: pointer; background-color: #3498db; color: white; border: none; border-radius: 4px; font-size: 14px; transition: background 0.3s; }
+        button:hover { background-color: #2980b9; }
+        .btn-green { background-color: #27ae60; }
+        .btn-green:hover { background-color: #219150; }
+        .btn-gray { background-color: #95a5a6; }
+        .btn-gray:hover { background-color: #7f8c8d; }
+        .btn-danger { background-color: #e74c3c; }
+        .btn-danger:hover { background-color: #c0392b; }
+        table { border-collapse: collapse; width: 100%; margin: 15px 0; font-size: 14px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f8f9fa; }
+        .dashboard { display: flex; justify-content: space-between; font-weight: bold; padding: 10px; background-color: #2c3e50; color: white; border-radius: 4px; margin-bottom: 20px; }
+        #service-level { color: #2ecc71; font-size: 1.2em; }
+        .formula { background-color: #e8f4fd; padding: 10px; border-left: 5px solid #3498db; margin: 10px 0; font-style: italic; }
+        #correction { margin-top: 20px; padding: 15px; border-radius: 4px; display: none; }
+        input[type="number"] { padding: 10px; width: 150px; border: 1px solid #ddd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Gestion Opérationnelle (E5) - BTS MCO</h1>
+    
+    <div class="dashboard">
+        <div>Thème : <span id="mission-title">Sélectionnez un thème</span></div>
+        <div>Taux de Service Client : <span id="service-level">100</span>%</div>
+    </div>
+
+    <div class="menu" id="main-menu">
+        <h2>Menu des thèmes</h2>
+        <button onclick="loadTheme('bilan')">Bilan & TN</button>
+        <button onclick="loadTheme('sig')">SIG & Rentabilité</button>
+        <button onclick="loadTheme('inv')">Investissement & VAN</button>
+        <button onclick="loadTheme('prix')">Gestion des Prix</button>
+        <button onclick="loadTheme('stock')">Gestion des Stocks</button>
+    </div>
+
+    <div id="exercise-content" class="exercise-area" style="display:none;">
+        <div id="scenario"></div>
+        <div id="question"></div>
+        <div id="correction"></div>
+        <div style="margin-top:20px;">
+            <button onclick="checkAnswer()" class="btn-green">Vérifier</button>
+            <button onclick="generateData()" class="btn-gray">Nouvel Exercice</button>
+            <button onclick="showMenu()" class="btn-danger">Retour au menu</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentTheme = '';
+    let serviceLevel = 100;
+    let correctAnswer = 0;
+    let currentQuestionType = '';
+
+    function showMenu() {
+        document.getElementById('exercise-content').style.display = 'none';
+        document.getElementById('main-menu').style.display = 'flex';
+        document.getElementById('correction').style.display = 'none';
+    }
+
+    function loadTheme(theme) {
+        currentTheme = theme;
+        document.getElementById('exercise-content').style.display = 'block';
+        document.getElementById('main-menu').style.display = 'none';
+        document.getElementById('correction').style.display = 'none';
+        serviceLevel = 100;
+        updateDashboard();
+        generateData();
+    }
+
+    function updateDashboard() {
+        document.getElementById('service-level').innerText = serviceLevel;
+        if (serviceLevel <= 50) {
+            alert("Game Over ! Taux de Service Client trop faible (50%). Le thème va être réinitialisé.");
+            loadTheme(currentTheme);
+        }
+    }
+
+    function generateData() {
+        document.getElementById('correction').style.display = 'none';
+        document.getElementById('correction').style.backgroundColor = '';
+        const scenario = document.getElementById('scenario');
+        const question = document.getElementById('question');
+        let html = '';
+        let types = [];
+
+        switch(currentTheme) {
+            case 'bilan':
+                document.getElementById('mission-title').innerText = "Analyse Bilan & TN";
+                types = ['tn', 'frng', 'bfr'];
+                currentQuestionType = types[Math.floor(Math.random() * types.length)];
+                
+                // Données de base cohérentes
+                let actCirc = Math.floor(Math.random() * 50000) + 20000;
+                let banques = Math.floor(Math.random() * 10000) + 2000;
+                let caisse = Math.floor(Math.random() * 2000) + 500;
+                let passCirc = Math.floor(Math.random() * 40000) + 15000;
+                let concourBanq = Math.floor(Math.random() * 8000) + 1000;
+                let resNet = Math.floor(Math.random() * 10000) + 2000;
+                let detLong = Math.floor(Math.random() * 30000) + 10000;
+                let capitauxProp = Math.floor(Math.random() * 50000) + 20000;
+                let immo = actCirc + banques + caisse + resNet - detLong - concourBanq - passCirc + detLong + capitauxProp; // Équilibre fictif pour l'exercice
+
+                html = `<h3>Scénario : Entreprise Commerciale "BioSaveur"</h3>
+                        <p>Extrait du bilan fonctionnel :</p>
+                        <table>
+                            <tr><th>Actif</th><th>Montant (€)</th><th>Passif</th><th>Montant (€)</th></tr>
+                            <tr><td>Immobilisations</td><td>${immo.toLocaleString()}</td><td>Capitaux propres</td><td>${capitauxProp.toLocaleString()}</td></tr>
+                            <tr><td>Actif circulant</td><td>${actCirc.toLocaleString()}</td><td>Dettes LT</td><td>${detLong.toLocaleString()}</td></tr>
+                            <tr><td>Banque</td><td>${banques.toLocaleString()}</td><td>Passif circulant</td><td>${passCirc.toLocaleString()}</td></tr>
+                            <tr><td>Caisse</td><td>${caisse.toLocaleString()}</td><td>Concours bancaires</td><td>${concourBanq.toLocaleString()}</td></tr>
+                        </table>`;
+                
+                if (currentQuestionType === 'tn') {
+                    correctAnswer = (banques + caisse) - concourBanq;
+                    question.innerHTML = html + `<p>Calculez la <strong>Trésorerie Nette (TN)</strong> (Trésorerie Active - Trésorerie Passive).</p><input type="number" id="user-answer">`;
+                } else if (currentQuestionType === 'frng') {
+                    // Calcul simplifié pour l'exemple généré
+                    correctAnswer = (capitauxProp + detLong) - immo;
+                    question.innerHTML = html + `<p>Calculez le <strong>Fonds de Roulement Net Global (FRNG)</strong>.</p><input type="number" id="user-answer">`;
+                } else {
+                    correctAnswer = actCirc - passCirc;
+                    question.innerHTML = html + `<p>Calculez le <strong>Besoin en Fonds de Roulement (BFR)</strong>.</p><input type="number" id="user-answer">`;
+                }
+                break;
+
+            case 'sig':
+                document.getElementById('mission-title').innerText = "SIG & Rentabilité";
+                types = ['marge', 'sr'];
+                currentQuestionType = types[Math.floor(Math.random() * types.length)];
+                
+                let ca = Math.floor(Math.random() * 100000) + 50000;
+                let cv = Math.floor(ca * (Math.random() * 0.4 + 0.3));
+                let cf = Math.floor(Math.random() * 20000) + 10000;
+                
+                html = `<h3>Scénario : Magasin "ModePlus"</h3>
+                        <table>
+                            <tr><th>Élément</th><th>Montant (€)</th></tr>
+                            <tr><td>Chiffre d'affaires (CA)</td><td>${ca.toLocaleString()}</td></tr>
+                            <tr><td>Coûts variables</td><td>${cv.toLocaleString()}</td></tr>
+                            <tr><td>Coûts fixes</td><td>${cf.toLocaleString()}</td></tr>
+                        </table>`;
+                
+                if (currentQuestionType === 'marge') {
+                    correctAnswer = ca - cv;
+                    question.innerHTML = html + `<p>Calculez la <strong>Marge sur Coût Variable</strong>.</p><input type="number" id="user-answer">`;
+                } else {
+                    let mcv = ca - cv;
+                    let tauxMCV = mcv / ca;
+                    correctAnswer = Math.round(cf / tauxMCV);
+                    question.innerHTML = html + `<p>Calculez le <strong>Seuil de Rentabilité (SR) en valeur</strong> (arrondi à l'unité).</p><input type="number" id="user-answer">`;
+                }
+                break;
+
+            case 'inv':
+                document.getElementById('mission-title').innerText = "Investissement & VAN";
+                let cap = Math.floor(Math.random() * 50000) + 20000;
+                let d = Math.floor(Math.random() * 3) + 3; // 3 à 5 ans
+                let cfs = [];
+                let totalCF = 0;
+                let htmlCF = '<ul>';
+                for(let i=1; i<=d; i++){
+                    let cf = Math.floor(Math.random() * 10000) + 5000;
+                    cfs.push(cf);
+                    totalCF += cf;
+                    htmlCF += `<li>Année ${i} : ${cf.toLocaleString()}€</li>`;
+                }
+                htmlCF += '</ul>';
+                
+                let taux = 0.05;
+                let van = -cap;
+                cfs.forEach((cf, index) => {
+                    van += cf / Math.pow(1+taux, index+1);
+                });
+                
+                correctAnswer = Math.round(van);
+                html = `<h3>Scénario : Projet d'investissement sur ${d} ans</h3>
+                        <p>Capital investi : <strong>${cap.toLocaleString()}€</strong></p>
+                        <p>Cash-flows prévus :</p>${htmlCF}
+                        <p>Taux d'actualisation : 5%</p>`;
+                question.innerHTML = html + `<p>Calculez la <strong>VAN</strong> (arrondie à l'unité).</p><input type="number" id="user-answer">`;
+                break;
+
+            case 'prix':
+                document.getElementById('mission-title').innerText = "Gestion des Prix";
+                types = ['tauxMarque', 'tauxMarge', 'pvht'];
+                currentQuestionType = types[Math.floor(Math.random() * types.length)];
+                
+                let pvat = Math.floor(Math.random() * 100) + 50;
+                let caP = Math.floor(pvat * 0.7);
+                
+                html = `<h3>Scénario : Produit "Article X"</h3>
+                        <p>Prix de Vente HT (PVHT) : ${pvat.toLocaleString()}€</p>
+                        <p>Coût d'achat (CA) : ${caP.toLocaleString()}€</p>`;
+                
+                if (currentQuestionType === 'tauxMarque') {
+                    correctAnswer = Math.round(((pvat - caP) / pvat) * 10000) / 100;
+                    question.innerHTML = html + `<p>Calculez le <strong>Taux de Marque</strong> (en %).</p><input type="number" step="0.01" id="user-answer">`;
+                } else if (currentQuestionType === 'tauxMarge') {
+                    correctAnswer = Math.round(((pvat - caP) / caP) * 10000) / 100;
+                    question.innerHTML = html + `<p>Calculez le <strong>Taux de Marge</strong> (en %).</p><input type="number" step="0.01" id="user-answer">`;
+                } else {
+                    let tauxM = Math.floor(Math.random() * 20) + 10;
+                    correctAnswer = Math.round(caP * (1 + tauxM/100));
+                    question.innerHTML = `<h3>Scénario : Produit "Article Y"</h3>
+                        <p>Coût d'achat : ${caP.toLocaleString()}€</p>
+                        <p>Taux de marge souhaité : ${tauxM}%</p>
+                        <p>Calculez le <strong>Prix de Vente HT</strong>.</p><input type="number" id="user-answer">`;
+                }
+                break;
+            
+            case 'stock':
+                document.getElementById('mission-title').innerText = "Gestion des Stocks";
+                types = ['rotation', 'couverture'];
+                currentQuestionType = types[Math.floor(Math.random() * types.length)];
+                
+                let conso = Math.floor(Math.random() * 5000) + 1000;
+                let stockM = Math.floor(Math.random() * 1000) + 200;
+                
+                html = `<h3>Scénario : Référence "Gadget Y"</h3>
+                        <p>Consommation annuelle : ${conso.toLocaleString()} unités</p>
+                        <p>Stock moyen : ${stockM.toLocaleString()} unités</p>`;
+                
+                if (currentQuestionType === 'rotation') {
+                    correctAnswer = Math.round((conso / stockM) * 10) / 10;
+                    question.innerHTML = html + `<p>Calculez la <strong>vitesse de rotation des stocks</strong> (arrondi à 1 décimale).</p><input type="number" step="0.1" id="user-answer">`;
+                } else {
+                    correctAnswer = Math.round((stockM / conso) * 360);
+                    question.innerHTML = html + `<p>Calculez la <strong>durée de couverture</strong> (en jours, base 360).</p><input type="number" id="user-answer">`;
+                }
+                break;
+        }
+        MathJax.typeset();
+    }
+
+    function checkAnswer() {
+        let userAnswer = parseFloat(document.getElementById('user-answer').value);
+        let feedback = document.getElementById('correction');
+        feedback.style.display = 'block';
+
+        if (isNaN(userAnswer)) {
+            feedback.innerHTML = "<strong>Erreur :</strong> Veuillez entrer un nombre.";
+            feedback.style.backgroundColor = '#fff3cd';
+            return;
+        }
+
+        // Tolérance réduite pour les pourcentages (0.1) et plus large pour les montants (1)
+        let tolerance = currentQuestionType === 'tauxMarque' || currentQuestionType === 'tauxMarge' ? 0.1 : 1;
+        
+        if (Math.abs(userAnswer - correctAnswer) <= tolerance) {
+            feedback.innerHTML = "<strong>Correct !</strong> Bravo.";
+            feedback.style.backgroundColor = '#d4edda';
+            feedback.style.color = '#155724';
+        } else {
+            serviceLevel -= 10;
+            feedback.innerHTML = `<strong>Incorrect.</strong> La réponse attendue était environ <strong>${correctAnswer.toLocaleString()}</strong>.`;
+            feedback.style.backgroundColor = '#f8d7da';
+            feedback.style.color = '#721c24';
+            updateDashboard();
+        }
+    }
+</script>
+
+</body>
+</html>
